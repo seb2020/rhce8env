@@ -1,0 +1,27 @@
+---
+- hosts: all
+  become: true
+
+  tasks:
+    - name: set motd
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^Banner'
+        line: 'Banner /etc/motd'
+
+    - name: x11
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^X11Forwarding'
+        line: 'X11Forwarding no'
+
+    - name: maxauthtries
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp:	'^#MaxAuthTries'
+        line: 'MaxAuthTries 3'
+
+    - name: restart sshd
+      ansible.builtin.service:
+        name: sshd
+        state: restarted

@@ -1,0 +1,79 @@
+---
+- hosts: all
+  become: true
+  vars_files:
+    - ../vars/user_list.yml
+    - ../vars/secret.yml
+
+  tasks:
+    - name: debug
+      ansible.builtin.debug:
+        msg: "The password is {{ user_password | string | password_hash('sha512') }}"
+
+    - name: create user in webservers
+      ansible.builtin.user:
+        name: "{{ item.username }}"
+        uid: "{{ item.uid }}"
+        groups: "wheel"
+        append: true
+        shell: /bin/bash
+        password: "{{ user_password | string | password_hash('sha512') }}"
+      with_items: "{{ users }}"
+      when: 
+        - "'webservers' in group_names"
+        - "'1' in item.uid|string|first"
+
+    - name: create user in database
+      ansible.builtin.user:
+        name: "{{ item.username }}"
+        uid: "{{ item.uid }}"
+        groups: "wheel"
+        append: true
+        shell: /bin/bash
+        password: "{{ database_password | string | password_hash('sha512') }}"
+      with_items: "{{ users }}"
+      when:
+        - "'database' in group_names"
+        - "'2' in item.uid|string|first"
+
+    - name: create .ssh folder
+      ansible.builtin.file:
+        state: directory
+        path: "/home/{{ item.username }}/.ssh"
+        mode: 0700
+      with_items: "{{ users }}"
+      when: 
+        - "'webservers' in group_names"
+        - "'1' in item.uid|string|first"
+
+    - name: create .ssh folder
+      ansible.builtin.file:
+        state: directory
+        path: "/home/{{ item.username }}/.ssh"
+        mode: 0700
+      with_items: "{{ users }}"
+      when:
+        - "'database' in group_names"
+        - "'2' in item.uid|string|first"
+
+
+    - name: copy key          
+      ansible.builtin.copy:
+        src: /home/automation/.ssh/id_rsa
+        dest: "/home/{{ item.username }}/.ssh/id_rsa"
+        mode: 0700
+      with_items: "{{ users }}"
+      when:
+        - "'webservers' in group_names"
+        - "'1' in item.uid|string|first"
+
+    - name: copy key
+      ansible.builtin.copy:
+        src: /home/automation/.ssh/id_rsa
+        dest: "/home/{{ item.username }}/.ssh/id_rsa"
+        mode: 0700
+      with_items: "{{ users }}"
+      when:
+        - "'database' in group_names"
+        - "'2' in item.uid|string|first"
+

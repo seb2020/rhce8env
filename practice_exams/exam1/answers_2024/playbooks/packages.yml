@@ -1,0 +1,22 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    - name: Install on proxy
+      ansible.builtin.package:
+        name: "{{ item }}"
+        state: latest
+      with_items: 
+        - tcpdump
+        - mailx
+      when: "'proxy' in group_names"
+
+    - name: Install on database
+      ansible.builtin.package:
+        name: "{{ item }}"
+        state: latest
+      with_items:
+        - mailx
+        - lsof
+      when: "'database' in group_names"
+

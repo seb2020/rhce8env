@@ -1,0 +1,26 @@
+---
+- hosts: database
+  become: true
+  tasks:
+    - name: Create required folder
+      ansible.builtin.file:
+        state: directory
+        path: /mnt
+
+    - name: Create required folder
+      ansible.builtin.file:
+        state: directory
+        path: /mnt/mysql_backups
+
+
+    - name: Create file
+      ansible.builtin.copy:
+        content: "dev,test,qa,prod"
+        dest: /mnt/mysql_backups/database_list.txt
+
+    - name: Archive 
+      # ansible-galaxy collection install community.general
+      community.general.archive:
+        path: /mnt/mysql_backups/database_list.txt
+        dest: /mnt/mysql_backups/archive.gz
+        
