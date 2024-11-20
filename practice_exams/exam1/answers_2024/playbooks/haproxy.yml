@@ -1,0 +1,22 @@
+---
+- hosts: proxy
+  become: true
+  vars:
+    - haproxy_backend_servers:
+      - name: app1
+        address: 192.168.55.203:80
+      - name: app2
+        address: 192.168.55.204:80
+    - haproxy_backend_balance_method: 'roundrobin'
+
+  tasks:
+    - name: firewall
+      ansible.posix.firewalld:
+        service: http
+        state: enabled
+        permanent: true
+        immediate: true
+
+    - name: include_role
+      ansible.builtin.include_role:
+        name: geerlingguy.haproxy

@@ -1,0 +1,39 @@
+---
+# tasks file for apache
+- name: install
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: latest
+  loop:
+    - httpd
+    - mod_ssl
+    - php
+
+- name: service
+  ansible.builtin.service:
+    name: httpd
+    enabled: yes
+    state: restarted
+
+- name: firewalld
+  ansible.posix.firewalld:
+    service: "{{ item }}"
+    state: enabled
+    permanent: true
+    immediate: true
+  loop:
+    - http
+    - https
+
+- name: set config
+  ansible.builtin.lineinfile:
+    path: /etc/httpd/conf/httpd.conf
+    regexp: '^Listen '
+    line: Listen {{  ansible_eth1.ipv4.address  }}:80
+
+
+- name: deploy index
+  ansible.builtin.template:
+    src: ../templates/index.html.j2
+    dest: /var/www/html/index.html
+  notify: restart httpd

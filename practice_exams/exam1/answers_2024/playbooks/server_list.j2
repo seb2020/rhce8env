@@ -1,0 +1,7 @@
+{% for host in groups['all'] %}
+   {{ hostvars[host]['ansible_facts']['fqdn'] }}
+{% endfor %}
+
+{{ hostvars['node1.ansi.example.com']['ansible_facts']['fqdn'] }} {{ hostvars['node2.ansi.example.com']['ansible_facts']['fqdn'] }}
+
+

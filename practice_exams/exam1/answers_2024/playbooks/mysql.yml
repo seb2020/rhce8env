@@ -1,0 +1,7 @@
+---
+- hosts: database
+  become: true
+  tasks:
+    - name: include
+      ansible.builtin.include_role:
+        name: sample-mysql

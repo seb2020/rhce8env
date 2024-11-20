@@ -3,7 +3,6 @@
   become: true
   tasks:
     - name: more than 512mb of ram
-    # ansible-galaxy collection install community.posix
       ansible.posix.sysctl :
         name: vm.swappiness
         value: 10
